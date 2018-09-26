@@ -1,0 +1,367 @@
+---
+title: "Úvod do dátovej analızy v R"
+output: html_document
+---
+
+Toto je R Markdown dokument, ktorı umoòuje do obyèajného textu vklada kusy kódu v R, napr. takto:
+
+```{r}
+summary(cars)
+```
+
+Následne je moné skompilova ho do HTML, PDF, Latex alebo MS Word dokumentu. Viac informácií o R Markdowne nájdete na <http://rmarkdown.rstudio.com>.
+
+## Èo je R
+
+R je jeden z najpouívanejších jazykov pre dátovú analızu. Vznikol ako dialekt jazyka S, ktorı bol vyvinutı Johnom Chambersom v Bell Laboratories v roku 1976 ako interné štatistické prostredie, pôvodne vo Fortrane, neskôr bol prepísanı do C-èka. R je implementáciou jazyka S z roku 1991. Jazyk je neustále vyvíjanı aktívnou komunitou; momentálne existuje vyše 13000 balíèkov dostupnıch v [CRAN archíve](https://cran.r-project.org/).
+
+## Základné príkazy
+
+Aktuálny pracovnı adresár zistíme nasledovne:
+
+```{r}
+getwd()
+# Zmeni ho vieme pomcou príkazu setwd()
+```
+
+Dokumentáciu k nejakej funkcii, napr. `rnorm`, ktorá slúi na vygenerovanie náhodnej hodnoty z normálneho rozdelenia, si vyvoláme pomocou:
+
+```{r}
+?rnorm
+# alternatívne: help("rnorm")
+```
+
+Ak nevieme presnı názov, môeme skúsi vyh¾adáva:
+
+```{r}
+??rnor
+# alternatívne: help.search("rnor")
+```
+
+Balíèek naèítame pomocou príkazu `library`:
+
+```{r}
+library(ggplot2)
+# ak ho nemáme, musíme ho najprv nainštalova: install.packages("ggplot2")
+```
+
+Priradenie hodnoty do premennej funguje pomocou operátora `<-`, ale dá sa poui aj klasické `=`:
+
+```{r}
+x <- 5 + 2
+print(x)
+```
+
+## Základné dátové typy
+
+Atomické dátové typy sú `character`, `numeric`, `integer`, `complex`, `logical`.
+
+```{r}
+class(x)
+is.numeric(x)
+is.integer(x) == TRUE
+is.integer(10L)
+as.character(x)
+```
+
+Špeciálne hodnoty:
+
+```{r}
+1/0
+
+is.numeric(-Inf)
+
+Inf - Inf
+
+is.nan(Inf)
+is.nan(NaN)
+is.na(NA)
+```
+
+### Vektor
+
+Všetko vo vektore musí by rovnakého typu, `vector()` vytvorí prázdny vektor.
+
+```{r}
+v1 <- c(1, 2, 3, 4)
+v1
+
+v2 <- 1:4
+v2
+
+v3 <- seq(1, 4, by = 1)
+v3
+
+v1[1]
+```
+
+Dåka vektora:
+
+```{r}
+length(v1)
+```
+
+### Zoznam (list)
+
+Zoznam (list) je vektor, resp. sekvencia objektov, v ktorej kadı môe by inı (rôzneho typu).
+
+```{r}
+l <- list(
+  name = "Robert",
+  surname = "Moro",
+  age = 27,
+  seminars = c("VOS", "MIP")
+)
+
+print(l)
+```
+
+Pristupovanie k prvkom zoznamu:
+
+```{r}
+print(l$name)
+l[1]
+l[[1]]
+l[["name"]]
+```
+
+Vlastnosti zoznamu:
+
+```{r}
+length(l)
+names(l)
+```
+
+### Matica
+
+Matica sa vytvára funkciou `matrix()`. Štandardne sa napåòa po ståpcoch, dá sa zmeni pomocou parametra `byrow`.
+
+```{r}
+m <- matrix(nrow = 2, ncol = 3)
+m
+
+dim(m)
+attributes(m)
+
+m <- matrix(1:6, nrow = 2, ncol = 3)
+m
+```
+
+Maticu vieme spravi aj z vektora:
+
+```{r}
+m <- 1:10
+dim(m) <- c(2, 5)
+m
+```
+
+Inı spôsob je zviaza dokopy ståpce alebo riadky:
+
+```{r}
+x <- 1:3
+y <- 10:12
+cbind(x, y)
+rbind(x, y)
+```
+
+### Faktor
+
+Faktor je špeciálny dátovı typ, ktorı umoòuje efektívne reprezentova nominálne (kategorické) premenné. Typickı príklad je pohlavie, ktoré môu nadobúda hodnoty M (male) alebo F (female). Môeme ho reprezentova pomocou reazcov:
+
+```{r}
+sex <- c("male", "male", "female", "male", "female")
+sex
+```
+
+Toto je však pamäovo (a pri niektorıch operáciách, napr. zistení poètu unikátnych hodnôt, aj èasovo) neefektívne. Taktie je to náchylné na preklepy.
+
+Faktor umoòuje takıto reazec reprezentova pomocou èísel:
+
+```{r}
+sex_f <- as.factor(sex)
+sex_f
+
+levels(sex_f)
+str(sex_f)
+
+as.integer(sex_f)
+```
+
+### Data.Frame
+
+Podobnı typ ako matica, ale umoòuje, aby mal kadı ståpec inı typ. Slúi na reprezentáciu tabu¾kovıch dát.
+
+```{r}
+df <- data.frame(name = c("Jozko", "Robo", "Jakub"), 
+                 has_phd = c(TRUE, FALSE, FALSE),
+                 sex = factor(c("male", "male", "male")))
+
+dimnames(df)
+nrow(df)
+dim(df)
+
+head(df)
+str(df)
+summary(df)
+
+df[1,]
+df[,1]
+df[, "has_phd"]
+df$has_phd
+df[["has_phd"]]
+df[df$has_phd == TRUE,]
+```
+
+Vıstup do CSV:
+
+```{r}
+write.csv(df, "lecturers.csv", row.names = FALSE)
+```
+
+Naèítanie z csv:
+
+```{r}
+df <- read.csv("lecturers.csv")
+df
+```
+
+## Funkcionálne prvky jazyka
+
+V Rku je funkcia obèanom prvej triedy. To znamená, e ju môeme uloi do premennej, môe by argumentom inej funkcie alebo funkcia môe vráti inú funkciu. Dole je uvedenıch zopár príkladov väèšinou prebratıch alebo inšpirovanıch knihou [Advanced R](http://adv-r.had.co.nz) od Hadleyho Wickhama. Pre viac informácií a príkladov pozrite jeho online dostupnú knihu.
+
+```{r}
+a_func <- function(f, vec) f(vec)
+
+x <- c(1, 2, 3)
+
+a_func(sum, x)
+a_func(mean, x)
+```
+
+Funkcia, ktorá berie ako jeden z argumentov funkciu, sa nazıva *funkcionál*. Najèastejšie pouívanımi funkcionálmi v Rku su `lapply`, `apply`, `sapply` a `tapply`. 
+
+```{r}
+unlist(lapply(mtcars, class))
+```
+
+```{r}
+mtcars2 <- data.frame(lapply(mtcars, function(x) x / mean(x)))
+head(mtcars2)
+```
+
+R obsahuje aj klasické `Map`, `Reduce` a `Filter` funkcie.
+
+```{r}
+# Vahovany priemer
+xs <- replicate(5, runif(10), simplify = FALSE)
+ws <- replicate(5, rpois(10, 5) + 1, simplify = FALSE)
+unlist(Map(weighted.mean, xs, ws))
+```
+
+
+```{r}
+Reduce(`+`, 1:3)
+Reduce(sum, 1:3)
+```
+
+
+```{r}
+df <- data.frame(x = 1:3, y = c("a", "b", "c"))
+str(Filter(is.factor, df))
+```
+
+## Uitoèné kninice
+
+### dplyr
+
+U¾ahèuje manipuláciu s dátami pomocou funkcií, ktoré vychádzajú z SQL.
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+df <- read.csv(file = 'fitts.csv')
+df$A <- factor(df$A)
+df$W <- factor(df$W)
+df$Block <- factor(df$Block)
+str(df)
+head(df)
+```
+
+```{r}
+dfM <- filter(df, Condition == "Mouse")
+dfS <- filter(df, Condition == "Space")
+
+df.grouped <- df %>% group_by(Participant, Condition) %>% summarise(Throughput = mean(Throughput))
+head(df.grouped)
+```
+
+
+### data.table
+
+Alternatíva na manipuláciu s dátami. Umoòuje efektívne pracova s ve¾kımi datasetmi. Oplatí sa tak investova èas do nauèenia na prvı poh¾ad nie vdy intuitívnej syntaxe. Odporúèam pozrie intro tu: https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html
+
+```{r}
+library(data.table)
+```
+
+```{r}
+df2 <- data.table(df)
+
+head(df2[Condition == "Mouse" & Block == 1])
+df2[Condition == "Mouse" & Block == 1, .N]
+
+df2[, .(Throughput = mean(Throughput)), by =.(Participant, Condition)]
+```
+
+
+### ggplot2
+
+Ve¾mi silná kninica na tvorbu vizualizácií dát.
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+hist(df.grouped$Throughput)
+```
+
+
+```{r}
+ggplot(df.grouped, aes(x=Throughput)) + 
+  geom_histogram(aes(y = ..density..), binwidth = .5, colour="black", fill="#C0C0C0") +
+  geom_density(alpha=.2, fill="#6699FF") +
+  theme_bw()
+```
+
+```{r}
+library(afex)
+
+fit <- aov_ez(data = df, id = "Participant", dv = "Throughput", between = "Condition", within = c("A", "W"))
+lsCond <- lsmeans(fit, "Condition")
+tab <- summary(lsCond)
+
+ggplot(data=tab, aes(x=Condition, y=lsmean, fill=Condition)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  geom_errorbar(aes(ymin=lsmean-SE, ymax=lsmean+SE), width=.3, size=.3,position=position_dodge(0)) +
+  scale_fill_manual(values=c("#999999", "#E69F00")) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  ylab("Throughput (mean)")
+```
+
+
+```{r}
+boxplot(Throughput ~ Condition, df)
+```
+
+
+```{r}
+ggplot(data = df, aes(x = Condition, y = Throughput)) + geom_boxplot(position = "dodge2") #+theme_bw()
+```
+
+### caret
+
+Je to kninica na trénovanie modelov strojového uèenia. Odporúèam pozrie dokumentáciu: http://topepo.github.io/caret/index.html
